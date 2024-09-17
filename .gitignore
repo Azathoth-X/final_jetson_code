@@ -1,1 +1,6 @@
+.venv\
+service_account.json
+__pychache__
 .venv
+/app/__pycache__
+/app/test.py
