@@ -174,21 +174,19 @@
 import serial
 import time
 import pandas as pd
-import os
-import sys
+# import os
+# import sys
 import threading
 from queue import Queue
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
-from googleapiclient.http import MediaFileUpload
+from .files_handler import upload_to_drive
 from datetime import datetime
-from fastapi import FastAPI, BackgroundTasks
+# from fastapi import FastAPI, BackgroundTasks
 # from typing import Optional
 
-app = FastAPI()
+# app = FastAPI()
 
 # Define the serial ports for each Arduino
-arduino_ports = ['/dev/ttyACM0', '/dev/ttyACM1', '/dev/ttyACM2', '/dev/ttyACM3']  # Adjust as needed
+arduino_ports = ['/dev/ttyACM0', '/dev/ttyACM1', '/dev/ttyACM2', '/dev/ttyACM3']  
 baud_rate = 115200
 ser_list = []
 data_queue = Queue()
@@ -216,7 +214,7 @@ def read_from_port(ser, index):
             print(f"Error reading from port {index}: {e}")
         time.sleep(0.02)  # Adjust the sleep time as needed
 
-def collect_data(folder_name: str, file_name: str):
+def collect_data(folder_name: str="test", file_name: str="test"):
     threads = []
     for index, ser in enumerate(ser_list):
         if ser.is_open:
@@ -227,7 +225,7 @@ def collect_data(folder_name: str, file_name: str):
 
     # Collect data from the queue
     data = [[] for _ in range(len(arduino_ports))]
-    limit = 400
+    limit = 1000
     skip = 50
 
     try:
@@ -274,66 +272,20 @@ def collect_data(folder_name: str, file_name: str):
     # Upload extracted file to Google Drive
     upload_to_drive(folder_name, extracted_file_name, full_file_name)
 
-def upload_to_drive(folder_name: str, extracted_file_name: str, full_file_name: str):
-    # Path to your service account key file
-    SERVICE_ACCOUNT_FILE = 'service_account.json'
-    SCOPES = ['https://www.googleapis.com/auth/drive.file']
 
-    # Authenticate using the service account
-    credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
-    drive_service = build('drive', 'v3', credentials=credentials)
 
-    # Function to get or create a folder in Google Drive
-    def get_or_create_folder(drive_service, folder_name, parent_id=None):
-        query = f"name='{folder_name}' and mimeType='application/vnd.google-apps.folder'"
-        if parent_id:
-            query += f" and '{parent_id}' in parents"
+# @app.post("/collect")
+# async def start_data_collection(folder_name: str, file_name: str, background_tasks: BackgroundTasks):
+#     """
+#     Endpoint to trigger data collection.
+#     - `folder_name`: The folder name in Google Drive
+#     - `file_name`: The base name for the CSV file
+#     """
+#     # background_tasks.add_task(collect_data, folder_name, file_name)
+#     return {"message": "Data collection started in the background"}
 
-        results = drive_service.files().list(q=query, fields="files(id, name)").execute()
-        items = results.get('files', [])
+# if __name__ == "__main__":
+#     import uvicorn
+#     uvicorn.run(app, host="0.0.0.0", port=8000)
 
-        if not items:
-            file_metadata = {
-                'name': folder_name,
-                'mimeType': 'application/vnd.google-apps.folder'
-            }
-            if parent_id:
-                file_metadata['parents'] = [parent_id]
-
-            folder = drive_service.files().create(body=file_metadata, fields='id').execute()
-            return folder.get('id')
-        else:
-            return items[0]['id']
-
-    # Use the function to get or create the folder
-    folder_id = get_or_create_folder(drive_service, folder_name, '1OlfTRlnNXJx-KJw2AAlls9kaQ9-YzePn')
-
-    # File metadata and media to be uploaded
-    file_metadata = {
-        'name': extracted_file_name,
-        'parents': [folder_id]
-    }
-    media = MediaFileUpload(extracted_file_name, mimetype='text/csv')
-
-    # Upload the file
-    file = drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-    print('File ID: %s' % file.get('id'))
-
-    # Remove the local files after upload
-    os.remove(extracted_file_name)
-    os.remove(full_file_name)
-    print("Local files removed")
-
-@app.post("/collect")
-async def start_data_collection(folder_name: str, file_name: str, background_tasks: BackgroundTasks):
-    """
-    Endpoint to trigger data collection.
-    - `folder_name`: The folder name in Google Drive
-    - `file_name`: The base name for the CSV file
-    """
-    # background_tasks.add_task(collect_data, folder_name, file_name)
-    return {"message": "Data collection started in the background"}
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+# @app.add_websocket_route()
