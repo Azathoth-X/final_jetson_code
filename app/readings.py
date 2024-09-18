@@ -178,10 +178,11 @@ import pandas as pd
 # import sys
 import threading
 from queue import Queue
-from .files_handler import upload_to_drive
+# from .files_handler import upload_to_drive
 from datetime import datetime
 # from fastapi import FastAPI, BackgroundTasks
 # from typing import Optional
+from . import files_handler
 
 # app = FastAPI()
 
@@ -270,7 +271,7 @@ def collect_data(folder_name: str="test", file_name: str="test"):
     df_extracted.to_csv(extracted_file_name, index=False)
 
     # Upload extracted file to Google Drive
-    upload_to_drive(folder_name, extracted_file_name, full_file_name)
+    files_handler.upload_to_drive(folder_name, extracted_file_name, full_file_name)
     return "complete"
 
 
