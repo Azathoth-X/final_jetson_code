@@ -182,7 +182,8 @@ from queue import Queue
 from datetime import datetime
 # from fastapi import FastAPI, BackgroundTasks
 # from typing import Optional
-from . import files_handler
+# from . import files_handler
+from app.files_handler import upload_to_drive
 
 # app = FastAPI()
 
@@ -271,7 +272,7 @@ def collect_data(folder_name: str="test", file_name: str="test"):
     df_extracted.to_csv(extracted_file_name, index=False)
 
     # Upload extracted file to Google Drive
-    files_handler.upload_to_drive(folder_name, extracted_file_name, full_file_name)
+    upload_to_drive(folder_name, extracted_file_name, full_file_name)
     return "complete"
 
 
