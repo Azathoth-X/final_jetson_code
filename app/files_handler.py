@@ -5,7 +5,11 @@ import os
 
 def upload_to_drive(folder_name: str, extracted_file_name: str, full_file_name: str):
     # Path to your service account key file
-    SERVICE_ACCOUNT_FILE = os.getcwd+'/'+'service_account.json'
+    SERVICE_ACCOUNT_FILE = os.path.join(os.getcwd(), 'service_account.json')
+
+    # Ensure the file exists
+    if not os.path.exists(SERVICE_ACCOUNT_FILE):
+        raise FileNotFoundError(f"Service account file not found at {SERVICE_ACCOUNT_FILE}")
     SCOPES = ['https://www.googleapis.com/auth/drive.file']
 
     # Authenticate using the service account
