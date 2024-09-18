@@ -7,6 +7,7 @@ from .readings import collect_data
 # from files_handler import upload_to_drive
 
 app=FastAPI(debug=True)
+connected_client = None
 
 # WebSocket endpoint
 @app.websocket("/ws")
