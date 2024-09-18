@@ -227,7 +227,7 @@ def collect_data(folder_name: str="test", file_name: str="test"):
 
     # Collect data from the queue
     data = [[] for _ in range(len(arduino_ports))]
-    limit = 1000
+    limit = 100
     skip = 50
 
     try:

@@ -1,0 +1,56 @@
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaFileUpload
+import os
+
+def upload_to_drive(folder_name: str, extracted_file_name: str, full_file_name: str):
+    # Path to your service account key file
+    SERVICE_ACCOUNT_FILE = 'service_account.json'
+    SCOPES = ['https://www.googleapis.com/auth/drive.file']
+
+    # Authenticate using the service account
+    credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+    drive_service = build('drive', 'v3', credentials=credentials)
+
+    # Function to get or create a folder in Google Drive
+    def get_or_create_folder(drive_service, folder_name, parent_id=None):
+        query = f"name='{folder_name}' and mimeType='application/vnd.google-apps.folder'"
+        if parent_id:
+            query += f" and '{parent_id}' in parents"
+
+        results = drive_service.files().list(q=query, fields="files(id, name)").execute()
+        items = results.get('files', [])
+
+        if not items:
+            file_metadata = {
+                'name': folder_name,
+                'mimeType': 'application/vnd.google-apps.folder'
+            }
+            if parent_id:
+                file_metadata['parents'] = [parent_id]
+
+            folder = drive_service.files().create(body=file_metadata, fields='id').execute()
+            return folder.get('id')
+        else:
+            return items[0]['id']
+
+    # Use the function to get or create the folder
+    folder_id = get_or_create_folder(drive_service, folder_name, '1OlfTRlnNXJx-KJw2AAlls9kaQ9-YzePn')
+
+    # File metadata and media to be uploaded
+    file_metadata = {
+        'name': extracted_file_name,
+        'parents': [folder_id]
+    }
+    media = MediaFileUpload(extracted_file_name, mimetype='text/csv')
+
+    # Upload the file
+    file = drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+    print('File ID: %s' % file.get('id'))
+
+    # Remove the local files after upload
+    os.remove(extracted_file_name)
+    os.remove(full_file_name)
+    print("Local files removed")
+    pass
+
