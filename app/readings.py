@@ -271,6 +271,7 @@ def collect_data(folder_name: str="test", file_name: str="test"):
 
     # Upload extracted file to Google Drive
     upload_to_drive(folder_name, extracted_file_name, full_file_name)
+    return "complete"
 
 
 
