@@ -3,7 +3,7 @@ import json
 from fastapi import FastAPI,Response, status, HTTPException, Depends, UploadFile,WebSocket,WebSocketDisconnect
 from fastapi.params import Body
 import threading
-from .readings import collect_data
+from .readings import collect_data,result_queue
 # from files_handler import upload_to_drive
 
 app=FastAPI(debug=True)
@@ -43,10 +43,11 @@ async def websocket_endpoint(websocket: WebSocket):
             if message['type'] == 'START_ANALYSIS':
                 # Directly start the collection if requested
                 # result = collect_data()
-                result=threading.Thread(target=collect_data(), daemon=True).start()
+                result=threading.Thread(target=collect_data, daemon=True).start()
                 await websocket.send_text(json.dumps({'type': 'ANALYSIS_RESULT', 'result': 'starting'}))
-                if result:
-                    await websocket.send_text(json.dumps({'type': 'ANALYSIS_RESULT', 'result': 'done'}))
+                result= result_queue.get()
+                # if result:
+                await websocket.send_text(json.dumps({'type': 'ANALYSIS_RESULT', 'result': result}))
 
 
 

@@ -192,6 +192,7 @@ arduino_ports = ['/dev/ttyACM0', '/dev/ttyACM1', '/dev/ttyACM2', '/dev/ttyACM3']
 baud_rate = 115200
 ser_list = []
 data_queue = Queue()
+result_queue = Queue()
 stop_event = threading.Event()
 
 # Open serial connections
@@ -273,7 +274,7 @@ def collect_data(folder_name: str="test", file_name: str="test"):
 
     # Upload extracted file to Google Drive
     upload_to_drive(folder_name, extracted_file_name, full_file_name)
-    return "complete"
+    result_queue.put("done")
 
 
 
