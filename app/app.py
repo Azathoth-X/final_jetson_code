@@ -46,7 +46,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 result=threading.Thread(target=collect_data(), daemon=True).start()
                 await websocket.send_text(json.dumps({'type': 'ANALYSIS_RESULT', 'result': 'starting'}))
                 if result:
-                    await websocket.send_text(json.dumps({'type': 'ANALYSIS_RESULT', 'result': result}))
+                    await websocket.send_text(json.dumps({'type': 'ANALYSIS_RESULT', 'result': 'done'}))
 
 
 

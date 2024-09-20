@@ -5,3 +5,4 @@ __pychache__
 /app/__pycache__
 /app/test.py
 /app/test.md
+.logs
