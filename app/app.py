@@ -7,6 +7,7 @@ from .readings import collect_data,result_queue
 from contextlib import asynccontextmanager
 # from asyncio import time
 import joblib
+
 # from files_handler import upload_to_drive
 
 @asynccontextmanager
@@ -88,7 +89,7 @@ async def websocket_endpoint(websocket: WebSocket):
         
     finally:
         connected_client = None
-        websocket.close()
+        await websocket.close()
 
 if __name__ == "__main__":
     import uvicorn
