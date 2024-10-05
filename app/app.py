@@ -5,7 +5,7 @@ from fastapi.params import Body
 import threading
 from .readings import collect_data,result_queue
 from contextlib import asynccontextmanager
-from asyncio import time
+# from asyncio import time
 import joblib
 # from files_handler import upload_to_drive
 
