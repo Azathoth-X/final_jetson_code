@@ -80,6 +80,9 @@ async def websocket_endpoint(websocket: WebSocket):
                 result= result_queue.get()
                 # if result:
                 await websocket.send_text(json.dumps({'type': 'ANALYSIS_RESULT', 'result': result}))
+                await websocket.close()
+
+            
             
 
 
@@ -89,7 +92,6 @@ async def websocket_endpoint(websocket: WebSocket):
         
     finally:
         connected_client = None
-        await websocket.close()
 
 if __name__ == "__main__":
     import uvicorn
