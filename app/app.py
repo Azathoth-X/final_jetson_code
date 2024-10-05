@@ -80,7 +80,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 result= result_queue.get()
                 # if result:
                 await websocket.send_text(json.dumps({'type': 'ANALYSIS_RESULT', 'result': result}))
-                await websocket.close()
+                
 
             
             
@@ -91,6 +91,7 @@ async def websocket_endpoint(websocket: WebSocket):
         print("WebSocket connection closed")
         
     finally:
+        await websocket.close()
         connected_client = None
 
 if __name__ == "__main__":
