@@ -3,6 +3,8 @@ import json
 from fastapi import FastAPI,Response, status, HTTPException, Depends, UploadFile,WebSocket,WebSocketDisconnect
 from fastapi.params import Body
 import threading
+
+from fastapi.websockets import WebSocketState
 from .readings import collect_data,result_queue
 from contextlib import asynccontextmanager
 # from asyncio import time
@@ -80,8 +82,10 @@ async def websocket_endpoint(websocket: WebSocket):
                 result= result_queue.get()
                 # if result:
                 await websocket.send_text(json.dumps({'type': 'ANALYSIS_RESULT', 'result': result}))
-                await websocket.close()
-                print('socket closed ')
+                # await websocket.close()
+                # print('socket closed ')
+                break
+
 
             
             
@@ -93,6 +97,8 @@ async def websocket_endpoint(websocket: WebSocket):
         
     finally:
         connected_client = None
+        if not websocket.application_state == WebSocketState.DISCONNECTED:
+            await websocket.close(code=1000, reason="Connection closed in finally block.")
 
 if __name__ == "__main__":
     import uvicorn
