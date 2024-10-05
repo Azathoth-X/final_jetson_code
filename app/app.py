@@ -4,10 +4,41 @@ from fastapi import FastAPI,Response, status, HTTPException, Depends, UploadFile
 from fastapi.params import Body
 import threading
 from .readings import collect_data,result_queue
+from contextlib import asynccontextmanager
+from asyncio import time
+import joblib
 # from files_handler import upload_to_drive
 
-app=FastAPI(debug=True)
+@asynccontextmanager
+async def lifespan(app:FastAPI):
+    global prodModel
+    try:
+        prodModel=joblib.load("app\ml_model\agglo_cluster_model.pkl")
+    except FileNotFoundError:
+        print("not model file ")
+    yield
+    pass
+
+
+
+
+
+
+
+
+
+
+app=FastAPI(debug=True,lifespan=lifespan)
 connected_client = None
+
+
+
+
+
+
+
+
+
 
 # WebSocket endpoint
 @app.websocket("/ws")
@@ -43,18 +74,21 @@ async def websocket_endpoint(websocket: WebSocket):
             if message['type'] == 'START_ANALYSIS':
                 # Directly start the collection if requested
                 # result = collect_data()
-                result=threading.Thread(target=collect_data, daemon=True).start()
+                result=threading.Thread(target=collect_data,args=("test","kewk"), daemon=True).start()
                 await websocket.send_text(json.dumps({'type': 'ANALYSIS_RESULT', 'result': 'starting'}))
                 result= result_queue.get()
                 # if result:
                 await websocket.send_text(json.dumps({'type': 'ANALYSIS_RESULT', 'result': result}))
+            
 
 
 
     except WebSocketDisconnect:
         print("WebSocket connection closed")
+        
     finally:
         connected_client = None
+        websocket.close()
 
 if __name__ == "__main__":
     import uvicorn
