@@ -4,5 +4,6 @@ __pychache__
 .venv
 /app/__pycache__
 /app/test.py
+/app/inference.py
 /app/test.md
 .logs
