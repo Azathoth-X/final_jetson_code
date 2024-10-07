@@ -77,7 +77,7 @@ async def websocket_endpoint(websocket: WebSocket):
             if message['type'] == 'START_ANALYSIS':
                 # Directly start the collection if requested
                 # result = collect_data()
-                await result=threading.Thread(target=collect_data,args=("test","kewk"), daemon=True).start()
+                result=threading.Thread(target=collect_data,args=("test","kewk"), daemon=True).start()
                 await websocket.send_text(json.dumps({'type': 'ANALYSIS_RESULT', 'result': 'starting'}))
                 result= result_queue.get()
                 # if result:

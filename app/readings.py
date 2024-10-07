@@ -184,6 +184,7 @@ from datetime import datetime
 # from typing import Optional
 # from . import files_handler
 from app.files_handler import upload_to_drive
+# from app.app import prodModel
 
 # app = FastAPI()
 
@@ -273,6 +274,9 @@ def collect_data(folder_name: str="test", file_name: str="test"):
         for ser in ser_list:
             if ser.is_open:
                 ser.close()
+
+    for thread in threads:
+        thread.join()
 
     # Ensure all 400 values are collected
     for i, d in enumerate(data):
