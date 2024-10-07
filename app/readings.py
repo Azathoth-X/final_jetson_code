@@ -221,28 +221,16 @@ for port in arduino_ports:
 def read_from_port(ser, index):
     while not stop_event.is_set():
         try:
-            if ser.is_open and ser.in_waiting > 0:  # Ensure serial port is open and has data
-                line = ser.readline().decode('utf-8').strip()  # Read and decode data
-                print(f"Port {index} received: {line}")
-                
-                if line:  # Ensure the line is not empty
-                    try:
-                        value = float(line)  # Try to convert to float
-                        data_queue.put((index, value))  # Add to queue with port index
-                    except ValueError:
-                        print(f"Non-numeric data received on port {index}: {line}")
-                else:
-                    print(f"Empty line received from port {index}")
-            else:
-                print(f"Port {index} not open or no data waiting")
+            if ser.in_waiting > 0:
+                line = ser.readline().decode('utf-8').strip()
+                data_queue.put((index, float(line)))  # Add index to identify the port
         except serial.SerialException as e:
             print(f"Serial exception on port {index}: {e}")
-            break  # Exit loop on serial error
+            break
         except Exception as e:
+            data_queue.put((index, None))  # Append None if there's an error
             print(f"Error reading from port {index}: {e}")
-            break  # Exit loop on general error
-        time.sleep(0.02)  # Control the read frequency
-
+        time.sleep(0.02)  # Adjust the sleep time as needed
 
 def collect_data(folder_name: str="test", file_name: str="test"):
     threads = []
@@ -256,7 +244,7 @@ def collect_data(folder_name: str="test", file_name: str="test"):
     # Collect data from the queue
     data = [[] for _ in range(len(arduino_ports))]
     limit = 100
-    skip = 50
+    skip = 0
 
     try:
         while all(len(d) < limit for d in data):  # Collect 400 values for each port
