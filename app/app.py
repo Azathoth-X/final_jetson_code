@@ -1,8 +1,9 @@
-from time import time
+# from time import time
 import json
-from fastapi import FastAPI,Response, status, HTTPException, Depends, UploadFile,WebSocket,WebSocketDisconnect
-from fastapi.params import Body
+from fastapi import FastAPI,WebSocket,WebSocketDisconnect
+# from fastapi.params import Body
 import threading
+import multiprocessing
 
 from fastapi.websockets import WebSocketState
 from .readings import collect_data,result_queue
@@ -35,14 +36,6 @@ app=FastAPI(debug=True,lifespan=lifespan)
 connected_client = None
 
 
-
-
-
-
-
-
-
-
 # WebSocket endpoint
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -63,13 +56,15 @@ async def websocket_endpoint(websocket: WebSocket):
             if message['type'] == 'START_ANALYSIS':
                 # Directly start the collection if requested
                 # result = collect_data()
-                result=threading.Thread(target=collect_data,args=("test","test"), daemon=False).start()
+                reading_and_result=multiprocessing.Process(target=collect_data,args=("test","test"), daemon=False)
+                reading_and_result.start()
                 await websocket.send_text(json.dumps({'type': 'ANALYSIS_RESULT', 'result': 'starting'}))
-                result= result_queue.get()
+                return_result= result_queue.get()
                 # if result:
-                await websocket.send_text(json.dumps({'type': 'ANALYSIS_RESULT', 'result': result}))
+                await websocket.send_text(json.dumps({'type': 'ANALYSIS_RESULT', 'result': return_result}))
                 # await websocket.close()
                 # print('socket closed ')
+                reading_and_result.close()
                 break
 
     except WebSocketDisconnect:
