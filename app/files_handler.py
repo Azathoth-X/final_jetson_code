@@ -3,7 +3,7 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 import os
 
-def upload_to_drive(folder_name: str, extracted_file_name: str, full_file_name: str):
+def upload_to_drive(folder_name: str, extracted_file_name: str):
     # Path to your service account key file
     SERVICE_ACCOUNT_FILE = os.path.join(os.getcwd(), 'service_account.json')
 
@@ -54,7 +54,6 @@ def upload_to_drive(folder_name: str, extracted_file_name: str, full_file_name: 
 
     # Remove the local files after upload
     os.remove(extracted_file_name)
-    os.remove(full_file_name)
     print("Local files removed")
     pass
 

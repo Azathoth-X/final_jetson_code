@@ -123,17 +123,17 @@ def collect_data(folder_name: str="test", file_name: str="test"):
     current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
     full_file_name = f"{file_name}_{current_time}.csv"
 
-    # Save the DataFrame to a CSV file
-    df.to_csv(full_file_name, index=False)
-    print(f"Data collection completed and saved to {full_file_name}")
+    # # Save the DataFrame to a CSV file
+    # df.to_csv(full_file_name, index=False)
+    # print(f"Data collection completed and saved to {full_file_name}")
 
     # Extract the required range from the DataFrame
-    df_extracted = df[skip:limit - skip]
+    # df_extracted = df[skip:limit - skip]
     extracted_file_name = f"extracted_{full_file_name}"
-    df_extracted.to_csv(extracted_file_name, index=False)
+    df.to_csv(extracted_file_name, index=False)
 
     # Upload extracted file to Google Drive
-    upload_to_drive(folder_name, extracted_file_name, full_file_name)
+    upload_to_drive(folder_name, extracted_file_name)
     result_queue.put("done")
 
 
