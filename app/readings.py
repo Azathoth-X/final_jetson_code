@@ -74,7 +74,7 @@ def read_from_port(ser, index):
 #         time.sleep(0.02)  # Control the read frequency
 
 
-def collect_data(folder_name: str="test", file_name: str="test"):
+def collect_data(folder_name: str, file_name:str):
     threads = []
     for index, ser in enumerate(ser_list):
         if ser.is_open:
@@ -124,16 +124,16 @@ def collect_data(folder_name: str="test", file_name: str="test"):
     full_file_name = f"{file_name}_{current_time}.csv"
 
     # # Save the DataFrame to a CSV file
-    # df.to_csv(full_file_name, index=False)
+    df.to_csv(full_file_name, index=False)
     # print(f"Data collection completed and saved to {full_file_name}")
 
     # Extract the required range from the DataFrame
-    # df_extracted = df[skip:limit - skip]
-    extracted_file_name = f"extracted_{full_file_name}"
-    df.to_csv(extracted_file_name, index=False)
+    # # df_extracted = df[skip:limit - skip]
+    # extracted_file_name = f"extracted_{full_file_name}"
+    # df.to_csv(extracted_file_name, index=False)
 
     # Upload extracted file to Google Drive
-    upload_to_drive(folder_name, extracted_file_name)
+    upload_to_drive(folder_name, full_file_name)
     result_queue.put("done")
 
 
