@@ -3,7 +3,7 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 import os
 
-def upload_to_drive(folder_name: str, extracted_file_name: str):
+def upload_to_drive(folder_name: str, full_file_name: str):
     # Path to your service account key file
     SERVICE_ACCOUNT_FILE = os.path.join(os.getcwd(), 'service_account.json')
 
@@ -43,17 +43,17 @@ def upload_to_drive(folder_name: str, extracted_file_name: str):
 
     # File metadata and media to be uploaded
     file_metadata = {
-        'name': extracted_file_name,
+        'name': full_file_name,
         'parents': [folder_id]
     }
-    media = MediaFileUpload(extracted_file_name, mimetype='text/csv')
+    media = MediaFileUpload(full_file_name, mimetype='text/csv')
 
     # Upload the file
     file = drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
     print('File ID: %s' % file.get('id'))
 
     # Remove the local files after upload
-    os.remove(extracted_file_name)
+    os.remove(full_file_name)
     print("Local files removed")
     pass
 
