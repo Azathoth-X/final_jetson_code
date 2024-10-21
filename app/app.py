@@ -2,14 +2,17 @@
 import json
 from fastapi import FastAPI,WebSocket,WebSocketDisconnect
 # from fastapi.params import Body
-import threading
+# import threading
 import multiprocessing
-
+import logging
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.websockets import WebSocketState
 from .readings import collect_data,result_queue
 from contextlib import asynccontextmanager
 # from asyncio import time
 import joblib
+import ipaddress
+
 
 # from files_handler import upload_to_drive
 
@@ -26,24 +29,35 @@ async def lifespan(app:FastAPI):
 
 
 
-
-
-
-
-
-
 app=FastAPI(debug=True,lifespan=lifespan)
 connected_client = None
+
+
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=["192.168.1.*", "localhost", "127.0.0.1"])
+
+START_IP = ipaddress.ip_address("192.168.1.100")
+END_IP = ipaddress.ip_address("192.168.1.200")
 
 
 # WebSocket endpoint
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     global connected_client
+    client_host=websocket.client.host
 
-    if connected_client is not None:
-        await websocket.close(code=1008, reason="Only one connection allowed.")
+    try:
+        host_ip=ipaddress.ip_address(client_host)
+        if not START_IP<=host_ip<=END_IP:
+            await websocket.close(code=1008,reason="IP not allowed")
+            return
+        if connected_client is not None:
+            await websocket.close(code=1008, reason="Only one connection allowed.")
+            return
+                
+
+    except ValueError:
         return
+    
 
     connected_client = websocket
     await websocket.accept()
@@ -53,10 +67,9 @@ async def websocket_endpoint(websocket: WebSocket):
             data = await websocket.receive_text()
             message = json.loads(data)
 
-            if message['type'] == 'START_ANALYSIS':
-                # Directly start the collection if requested
-                # result = collect_data()
-                reading_and_result=multiprocessing.Process(target=collect_data,args=("test","test"), daemon=False)
+            if message['type'] == 'START_ANALYSIS' :
+                patient_name:str = message['name']
+                reading_and_result=multiprocessing.Process(target=collect_data,args=("test", patient_name), daemon=False)
                 reading_and_result.start()
                 await websocket.send_text(json.dumps({'type': 'ANALYSIS_RESULT', 'result': 'starting'}))
                 return_result= result_queue.get()
@@ -74,6 +87,13 @@ async def websocket_endpoint(websocket: WebSocket):
         connected_client = None
         if not websocket.application_state == WebSocketState.DISCONNECTED:
             await websocket.close(code=1000, reason="Connection closed in finally block.")
+
+
+# @app.get('/shutdown')
+# def shutdown_jetson():
+
+
+
 
 if __name__ == "__main__":
     import uvicorn
