@@ -25,7 +25,7 @@ arduino_ports = ['/dev/ttyACM0', '/dev/ttyACM1', '/dev/ttyACM2', '/dev/ttyACM3']
 baud_rate = 115200
 ser_list = []
 data_queue = Queue()
-result_queue = Queue()
+# result_queue = Queue()
 stop_event = threading.Event()
 
 # Open serial connections
@@ -76,7 +76,7 @@ def read_from_port(ser, index):
 #         time.sleep(0.02)  # Control the read frequency
 
 
-def collect_data(folder_name: str, file_name:str):
+def collect_data(folder_name: str, file_name:str,result_queue):
     threads = []
     for index, ser in enumerate(ser_list):
         if ser.is_open:

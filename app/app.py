@@ -5,15 +5,15 @@ from fastapi import FastAPI,WebSocket,WebSocketDisconnect
 # import threading
 import multiprocessing
 import logging
-from fastapi.middleware.trustedhost import TrustedHostMiddleware
+# from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.websockets import WebSocketState
-from .readings import collect_data,result_queue
+from .readings import collect_data
 from contextlib import asynccontextmanager
 # from asyncio import time
 import joblib
 import ipaddress
 
-
+result_queue=multiprocessing.Queue()
 # from files_handler import upload_to_drive
 
 @asynccontextmanager
@@ -70,7 +70,7 @@ async def websocket_endpoint(websocket: WebSocket):
             if message['type'] == 'START_ANALYSIS' :
                 patient_name:str = message['name']
                 await websocket.send_text(json.dumps({'type': 'ANALYSIS_RESULT', 'result': 'starting'}))
-                reading_and_result=multiprocessing.Process(target=collect_data,args=("test", patient_name), daemon=False)
+                reading_and_result=multiprocessing.Process(target=collect_data,args=("test", patient_name,result_queue), daemon=False)
                 reading_and_result.start()
                 reading_and_result.join()
                 reading_and_result.close()
