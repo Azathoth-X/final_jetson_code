@@ -1,5 +1,5 @@
 import json
-from fastapi import FastAPI,WebSocket,WebSocketDisconnect
+from fastapi import FastAPI,WebSocket,WebSocketDisconnect,Request,Response,status
 import multiprocessing
 import logging
 from fastapi.websockets import WebSocketState
@@ -8,6 +8,8 @@ from contextlib import asynccontextmanager
 import joblib
 from .schema import ResultInfoModel
 import ipaddress
+import os
+import signal
 
 result_queue=multiprocessing.Queue()
 
@@ -90,8 +92,13 @@ async def websocket_endpoint(websocket: WebSocket):
             await websocket.close(code=1000, reason="Connection closed in finally block.")
 
 
-# @app.get('/shutdown')
-# def shutdown_jetson():
+@app.get('/shutdown')
+def shutdown_jetson(request:Request,):
+    client_ip = ipaddress.IPv4Address(str(request.client.host))
+    if START_IP<=client_ip<=END_IP:
+        return Response(content='Host not allowed',status_code=status.HTTP_401_UNAUTHORIZED)
+    os.kill(os.getpid(),signal.SIGTERM)
+    return Response("Shutting Down",status.HTTP_200_OK)
 
 
 
