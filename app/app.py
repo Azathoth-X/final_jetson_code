@@ -96,7 +96,7 @@ async def websocket_endpoint(websocket: WebSocket):
 def shutdown_jetson(request:Request):
     client_ip = ipaddress.IPv4Address(str(request.client.host))
     if START_IP<=client_ip<=END_IP:
-        return Response(content='Host not allowed',status_code=status.HTTP_401_UNAUTHORIZED)
+        return Response(content=f'Host not allowed{client_ip}',status_code=status.HTTP_401_UNAUTHORIZED)
     os.kill(os.getpid(),signal.SIGTERM)
     return Response("Shutting Down",status.HTTP_200_OK)
 
