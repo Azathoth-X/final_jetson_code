@@ -10,6 +10,7 @@ from .schema import ResultInfoModel
 import ipaddress
 import os
 import signal
+import subprocess
 
 result_queue=multiprocessing.Queue()
 
@@ -21,7 +22,8 @@ async def lifespan(app:FastAPI):
     except FileNotFoundError:
         print("not model file ")
     yield
-    pass
+    subprocess.run(["shutdown", "/r", "/t", "20"])
+    return
 
 
 
