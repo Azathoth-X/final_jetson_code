@@ -51,7 +51,7 @@ def upload_to_drive(folder_name: str, full_file_name: str,SendInfo:ResultInfoMod
 
     # Upload the file
     file = drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-    SendInfo.FileId=file.get('id')
+    SendInfo.FileId= file.get('id')
     print('File ID: %s' % file.get('id'))
 
     # Remove the local files after upload

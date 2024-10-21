@@ -1,21 +1,15 @@
-# from time import time
 import json
 from fastapi import FastAPI,WebSocket,WebSocketDisconnect
-# from fastapi.params import Body
-# import threading
 import multiprocessing
 import logging
-# from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.websockets import WebSocketState
 from .readings import collect_data
 from contextlib import asynccontextmanager
-# from asyncio import time
 import joblib
 from .schema import ResultInfoModel
 import ipaddress
 
 result_queue=multiprocessing.Queue()
-# from files_handler import upload_to_drive
 
 @asynccontextmanager
 async def lifespan(app:FastAPI):
@@ -34,7 +28,6 @@ app=FastAPI(debug=True,lifespan=lifespan)
 connected_client = None
 shutdownAvailable: bool=False
 
-# app.add_middleware(TrustedHostMiddleware, allowed_hosts=["192.168.1.*", "localhost", "127.0.0.1"])
 
 START_IP = ipaddress.ip_address("192.168.1.100")
 END_IP = ipaddress.ip_address("192.168.1.200")
@@ -69,18 +62,23 @@ async def websocket_endpoint(websocket: WebSocket):
             message = json.loads(data)
 
             if message['type'] == 'START_ANALYSIS' :
+
                 patient_name:str = message['name']
+
                 await websocket.send_text(json.dumps({'type': 'ANALYSIS_RESULT', 'result': 'starting'}))
+
                 reading_and_result=multiprocessing.Process(target=collect_data,args=("test", patient_name,result_queue), daemon=False)
+
                 reading_and_result.start()
+
                 reading_and_result.join()
+
                 reading_and_result.close()
+
                 return_result:ResultInfoModel= result_queue.get()
-                # if result:
-                # await websocket.send_text(json.dumps({'type': 'ANALYSIS_RESULT', 'result': return_result}))
+
                 await websocket.send_text(return_result.model_dump_json())
-                # await websocket.close()
-                # print('socket closed ')
+
                 break
 
     except WebSocketDisconnect:

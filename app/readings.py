@@ -5,34 +5,27 @@
 import serial
 import time
 import pandas as pd
-# import os
-# import sys
 import threading
 from queue import Queue
-# from .files_handler import upload_to_drive
 from datetime import datetime
-# from fastapi import FastAPI, BackgroundTasks
-# from typing import Optional
-# from . import files_handler
 from app.files_handler import upload_to_drive
-# from app.app import prodModel
 from .schema import ResultInfoModel
 
 
 # Define the serial ports for each Arduino
-# top-left gets 0 auto similarly tor right is 1, bottom left is 2 and bottom right is 3
+# top-left port gets 0 auto similarly tor right is 1, bottom left is 2 and bottom right is 3
+#looking from back at jetson
 
-arduino_ports = ['/dev/ttyACM0', '/dev/ttyACM1', '/dev/ttyACM2', '/dev/ttyACM3']  #tl:0 tr:1 bl:2
-baud_rate = 115200
+ARDUINO_PORTS = ['/dev/ttyACM0', '/dev/ttyACM1', '/dev/ttyACM2', '/dev/ttyACM3']  
+BAUD_RATE = 115200
 ser_list = []
 data_queue = Queue()
-# result_queue = Queue()
 stop_event = threading.Event()
 
 # Open serial connections
-for port in arduino_ports:
+for port in ARDUINO_PORTS:
     try:
-        ser = serial.Serial(port, baud_rate)
+        ser = serial.Serial(port, BAUD_RATE)
         ser_list.append(ser)
     except serial.SerialException as e:
         print(f"Could not open port {port}: {e}")
@@ -87,7 +80,7 @@ def collect_data(folder_name: str, file_name:str,result_queue):
             threads.append(thread)
 
     # Collect data from the queue
-    data = [[] for _ in range(len(arduino_ports))]
+    data = [[] for _ in range(len(ARDUINO_PORTS))]
     limit = 100
 
     try:
