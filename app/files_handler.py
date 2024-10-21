@@ -55,5 +55,5 @@ def upload_to_drive(folder_name: str, full_file_name: str):
     # Remove the local files after upload
     os.remove(full_file_name)
     print("Local files removed")
-    pass
+    return
 

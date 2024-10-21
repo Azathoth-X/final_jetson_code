@@ -19,7 +19,9 @@ from app.files_handler import upload_to_drive
 
 
 # Define the serial ports for each Arduino
-arduino_ports = ['/dev/ttyACM0', '/dev/ttyACM1', '/dev/ttyACM2', '/dev/ttyACM3']  
+# top-left gets 0 auto similarly tor right is 1, bottom left is 2 and bottom right is 3
+
+arduino_ports = ['/dev/ttyACM0', '/dev/ttyACM1', '/dev/ttyACM2', '/dev/ttyACM3']  #tl:0 tr:1 bl:2
 baud_rate = 115200
 ser_list = []
 data_queue = Queue()
@@ -86,7 +88,6 @@ def collect_data(folder_name: str, file_name:str):
     # Collect data from the queue
     data = [[] for _ in range(len(arduino_ports))]
     limit = 100
-    skip = 0
 
     try:
         while all(len(d) < limit for d in data):  # Collect 400 values for each port
@@ -135,6 +136,7 @@ def collect_data(folder_name: str, file_name:str):
     # Upload extracted file to Google Drive
     upload_to_drive(folder_name, full_file_name)
     result_queue.put("done")
+    return
 
 
 
