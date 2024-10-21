@@ -55,7 +55,7 @@ def upload_to_drive(folder_name: str, full_file_name: str,SendInfo:ResultInfoMod
     print('File ID: %s' % file.get('id'))
 
     # Remove the local files after upload
-    os.remove(full_file_name)
+    # os.remove(full_file_name)
     print("Local files removed")
     return
 
