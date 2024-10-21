@@ -22,7 +22,7 @@ async def lifespan(app:FastAPI):
     except FileNotFoundError:
         print("not model file ")
     yield
-    subprocess.run(["shutdown", "/r", "/t", "20"])
+    subprocess.run(["shutdown", "-h"])
     return
 
 
