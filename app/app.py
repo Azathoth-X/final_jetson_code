@@ -16,11 +16,7 @@ result_queue=multiprocessing.Queue()
 
 @asynccontextmanager
 async def lifespan(app:FastAPI):
-    global prodModel
-    try:
-        prodModel=joblib.load("app\ml_model\agglo_cluster_model.pkl")
-    except FileNotFoundError:
-        print("not model file ")
+    
     yield
     subprocess.run(["shutdown", "-h"])
     return
@@ -40,7 +36,8 @@ END_IP = ipaddress.ip_address("192.168.1.200")
 # WebSocket endpoint
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
-    global connected_client
+    global connected_client, shutdownAvailable
+
     client_host=websocket.client.host
 
     try:
@@ -59,9 +56,12 @@ async def websocket_endpoint(websocket: WebSocket):
 
     connected_client = websocket
     await websocket.accept()
+    shutdownAvailable=False
 
     try:
+        
         while True:
+           
             data = await websocket.receive_text()
             message = json.loads(data)
 
@@ -89,6 +89,7 @@ async def websocket_endpoint(websocket: WebSocket):
         print("WebSocket connection closed")
         
     finally:
+        shutdownAvailable=True
         connected_client = None
         if not websocket.application_state == WebSocketState.DISCONNECTED:
             await websocket.close(code=1000, reason="Connection closed in finally block.")
@@ -96,9 +97,9 @@ async def websocket_endpoint(websocket: WebSocket):
 
 @app.get('/shutdown')
 def shutdown_jetson(request:Request):
-    # client_ip = ipaddress.IPv4Address(str(request.client.host))
-    # if START_IP<=client_ip<=END_IP:
-    #     return Response(content=f'Host not allowed{client_ip}',status_code=status.HTTP_401_UNAUTHORIZED)
+    client_ip = ipaddress.IPv4Address(str(request.client.host))
+    if not START_IP<=client_ip<=END_IP:
+        return Response(content=f'Host not allowed{client_ip}',status_code=status.HTTP_401_UNAUTHORIZED)
     if shutdownAvailable:
         os.kill(os.getpid(),signal.SIGINT)
         return Response("Shutting Down",status.HTTP_200_OK)
