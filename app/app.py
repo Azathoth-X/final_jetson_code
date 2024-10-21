@@ -72,6 +72,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 await websocket.send_text(json.dumps({'type': 'ANALYSIS_RESULT', 'result': 'starting'}))
                 reading_and_result=multiprocessing.Process(target=collect_data,args=("test", patient_name), daemon=False)
                 reading_and_result.start()
+                reading_and_result.join()
                 reading_and_result.close()
                 return_result= result_queue.get()
                 # if result:
