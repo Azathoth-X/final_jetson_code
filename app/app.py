@@ -28,7 +28,7 @@ async def lifespan(app:FastAPI):
 
 app=FastAPI(debug=True,lifespan=lifespan)
 connected_client = None
-shutdownAvailable: bool=False
+shutdownAvailable: bool=True
 
 
 START_IP = ipaddress.ip_address("192.168.1.100")
@@ -94,11 +94,12 @@ async def websocket_endpoint(websocket: WebSocket):
 
 @app.get('/shutdown')
 def shutdown_jetson(request:Request):
-    client_ip = ipaddress.IPv4Address(str(request.client.host))
-    if START_IP<=client_ip<=END_IP:
-        return Response(content=f'Host not allowed{client_ip}',status_code=status.HTTP_401_UNAUTHORIZED)
-    os.kill(os.getpid(),signal.SIGTERM)
-    return Response("Shutting Down",status.HTTP_200_OK)
+    # client_ip = ipaddress.IPv4Address(str(request.client.host))
+    # if START_IP<=client_ip<=END_IP:
+    #     return Response(content=f'Host not allowed{client_ip}',status_code=status.HTTP_401_UNAUTHORIZED)
+    if shutdownAvailable:
+        os.kill(os.getpid(),signal.SIGTERM)
+        return Response("Shutting Down",status.HTTP_200_OK)
 
 
 
