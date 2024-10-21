@@ -33,7 +33,7 @@ app=FastAPI(debug=True,lifespan=lifespan)
 connected_client = None
 
 
-app.add_middleware(TrustedHostMiddleware, allowed_hosts=["192.168.1.*", "localhost", "127.0.0.1"])
+# app.add_middleware(TrustedHostMiddleware, allowed_hosts=["192.168.1.*", "localhost", "127.0.0.1"])
 
 START_IP = ipaddress.ip_address("192.168.1.100")
 END_IP = ipaddress.ip_address("192.168.1.200")
