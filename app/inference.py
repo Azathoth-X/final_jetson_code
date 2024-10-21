@@ -113,16 +113,16 @@
 # #---------------------------------------------------------------------------------------------------------------------------------
 
 # # Save the model after fitting
-# model_path = 'agglo_cluster_model.pkl'
-# joblib.dump(agglo_cluster, model_path)
-# print(f"Model saved to {model_path}")
+# MODEL_PATH = 'agglo_cluster_model.pkl'
+# joblib.dump(agglo_cluster, MODEL_PATH)
+# print(f"Model saved to {MODEL_PATH}")
 
 # #-------------------------------------------------------------------------------------------------------------------------------
 
 
 # # Load the previously saved model
-# model_path = 'agglo_cluster_model.pkl'
-# loaded_model = joblib.load(model_path)
+# MODEL_PATH = 'agglo_cluster_model.pkl'
+# loaded_model = joblib.load(MODEL_PATH)
 
 # # Example new test sample (replace with actual test sample)
 # new_test_sample = np.random.rand(1, combined_feature_data.shape[1])  # Replace with actual test data
@@ -163,33 +163,34 @@ import pandas as pd
 import numpy as np
 import joblib
 from xgboost import XGBClassifier
+from .schema import ResultInfoModel
 
-# Step 2: Retrain with New Data
-# Assuming X_train_new and y_train_new are the new training data
-loaded_model.fit(X_train_new, y_train_new)
-# Save the updated model
-joblib.dump(loaded_model, 'xgboost_model_updated.pkl')
-print("Model retrained and saved as 'xgboost_model_updated.pkl'")
-# Step 3: Inference with Updated Model
-# Load the updated model
-updated_model = joblib.load('xgboost_model_updated.pkl')
-# Predict class for new input data
-new_data = X_test[0].reshape(1, -1)  # Replace X_test[0] with your actual input data
-predicted_label = updated_model.predict(new_data)
-# Map numerical label to class label
-class_mapping = {0: 'TB-Negative', 1: 'TB-Positive'}
-predicted_class = class_mapping[predicted_label[0]]
-# Output the predicted class
-print(f'Predicted class: {predicted_class}')
+# # Step 2: Retrain with New Data
+# # Assuming X_train_new and y_train_new are the new training data
+# loaded_model.fit(X_train_new, y_train_new)
+# # Save the updated model
+# joblib.dump(loaded_model, 'xgboost_model_updated.pkl')
+# print("Model retrained and saved as 'xgboost_model_updated.pkl'")
+# # Step 3: Inference with Updated Model
+# # Load the updated model
+# updated_model = joblib.load('xgboost_model_updated.pkl')
+# # Predict class for new input data
+# new_data = X_test[0].reshape(1, -1)  # Replace X_test[0] with your actual input data
+# predicted_label = updated_model.predict(new_data)
+# # Map numerical label to class label
+# class_mapping = {0: 'TB-Negative', 1: 'TB-Positive'}
+# predicted_class = class_mapping[predicted_label[0]]
+# # Output the predicted class
+# print(f'Predicted class: {predicted_class}')
 
 
 
 
-model_path = 'ml_model/xgboost_model.pkl'
+MODEL_PATH:str = 'ml_model/xgboost_model.pkl'
 
 def load_model():
     try:
-        loaded_model = joblib.load(model_path)
+        loaded_model = joblib.load(MODEL_PATH)
         print("Existing model loaded.")
     except FileNotFoundError:
         print("No existing model found. Please train the model first.")
@@ -208,7 +209,7 @@ def convertToDiff(sample: pd.DataFrame) -> np.ndarray:
 
     return diff_df
 
-def inference(df: pd.DataFrame) -> str:
+def inference(df: pd.DataFrame,sendInfo:ResultInfoModel) -> str:
     inference_data = convertToDiff(df)
     
     xgmodel = load_model()
