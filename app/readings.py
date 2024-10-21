@@ -16,6 +16,7 @@ from datetime import datetime
 # from . import files_handler
 from app.files_handler import upload_to_drive
 # from app.app import prodModel
+from .schema import ResultInfoModel
 
 
 # Define the serial ports for each Arduino
@@ -124,6 +125,9 @@ def collect_data(folder_name: str, file_name:str,result_queue):
     current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
     full_file_name = f"{file_name}_{current_time}.csv"
 
+
+    SendInfoBack=ResultInfoModel()
+    SendInfoBack.FileName=full_file_name
     # # Save the DataFrame to a CSV file
     df.to_csv(full_file_name, index=False)
     # print(f"Data collection completed and saved to {full_file_name}")
@@ -134,8 +138,8 @@ def collect_data(folder_name: str, file_name:str,result_queue):
     # df.to_csv(extracted_file_name, index=False)
 
     # Upload extracted file to Google Drive
-    upload_to_drive(folder_name, full_file_name)
-    result_queue.put("done")
+    upload_to_drive(folder_name, full_file_name,SendInfoBack)
+    result_queue.put(SendInfoBack)
     return
 
 

@@ -11,6 +11,7 @@ from .readings import collect_data
 from contextlib import asynccontextmanager
 # from asyncio import time
 import joblib
+from .schema import ResultInfoModel
 import ipaddress
 
 result_queue=multiprocessing.Queue()
@@ -31,7 +32,7 @@ async def lifespan(app:FastAPI):
 
 app=FastAPI(debug=True,lifespan=lifespan)
 connected_client = None
-
+shutdownAvailable: bool=False
 
 # app.add_middleware(TrustedHostMiddleware, allowed_hosts=["192.168.1.*", "localhost", "127.0.0.1"])
 
@@ -74,9 +75,10 @@ async def websocket_endpoint(websocket: WebSocket):
                 reading_and_result.start()
                 reading_and_result.join()
                 reading_and_result.close()
-                return_result= result_queue.get()
+                return_result:ResultInfoModel= result_queue.get()
                 # if result:
-                await websocket.send_text(json.dumps({'type': 'ANALYSIS_RESULT', 'result': return_result}))
+                # await websocket.send_text(json.dumps({'type': 'ANALYSIS_RESULT', 'result': return_result}))
+                await websocket.send_text(return_result.model_dump_json())
                 # await websocket.close()
                 # print('socket closed ')
                 break

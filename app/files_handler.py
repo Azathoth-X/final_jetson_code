@@ -2,11 +2,12 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 import os
+from .schema import ResultInfoModel
 
-def upload_to_drive(folder_name: str, full_file_name: str):
+def upload_to_drive(folder_name: str, full_file_name: str,SendInfo:ResultInfoModel):
     # Path to your service account key file
     SERVICE_ACCOUNT_FILE = os.path.join(os.getcwd(), 'service_account.json')
-
+    
     # Ensure the file exists
     if not os.path.exists(SERVICE_ACCOUNT_FILE):
         raise FileNotFoundError(f"Service account file not found at {SERVICE_ACCOUNT_FILE}")
@@ -50,6 +51,7 @@ def upload_to_drive(folder_name: str, full_file_name: str):
 
     # Upload the file
     file = drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+    SendInfo.FileId=file.get('id')
     print('File ID: %s' % file.get('id'))
 
     # Remove the local files after upload
