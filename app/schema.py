@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
 class ResultInfoModel(BaseModel):
-    FileName:str
-    FileId:str
-    TB_InferenceResult:bool = False
+    FileName:str|None
+    FileId:str|None
+    TB_InferenceResult:bool = False | None
