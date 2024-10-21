@@ -3,10 +3,11 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 import os
 from .schema import ResultInfoModel
+SERVICE_ACCOUNT_FILE = os.path.join(os.getcwd(), 'service_account.json')
 
 def upload_to_drive(folder_name: str, full_file_name: str,SendInfo:ResultInfoModel):
     # Path to your service account key file
-    SERVICE_ACCOUNT_FILE = os.path.join(os.getcwd(), 'service_account.json')
+    
     
     # Ensure the file exists
     if not os.path.exists(SERVICE_ACCOUNT_FILE):
