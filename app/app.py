@@ -100,7 +100,7 @@ def shutdown_jetson(request:Request):
     # if START_IP<=client_ip<=END_IP:
     #     return Response(content=f'Host not allowed{client_ip}',status_code=status.HTTP_401_UNAUTHORIZED)
     if shutdownAvailable:
-        os.kill(os.getpid(),signal.SIGTERM)
+        os.kill(os.getpid(),signal.SIGINT)
         return Response("Shutting Down",status.HTTP_200_OK)
 
 
