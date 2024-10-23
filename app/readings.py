@@ -10,7 +10,7 @@ from queue import Queue
 from datetime import datetime
 from app.files_handler import upload_to_drive
 from .schema import ResultInfoModel
-
+from .inference import inference
 
 # Define the serial ports for each Arduino
 # top-left port gets 0 auto similarly tor right is 1, bottom left is 2 and bottom right is 3
@@ -110,28 +110,29 @@ def collect_data(folder_name: str, file_name:str,result_queue):
 
     # Transpose data to match the original format
     final_data = list(map(list, zip(*data)))
-
+    inference_df=pd.DataFrame(final_data)
     # Create a DataFrame and save it to a CSV file
-    df = pd.DataFrame(final_data, columns=['GO1', 'GO2', 'PANI_F1', 'Mg'])
+    df = pd.DataFrame(final_data, columns=['GO', 'Ni', 'MOF', 'Mg'])
 
     # Format the file name with current date and time
     current_time = datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
-    full_file_name = f"{file_name}_{current_time}.csv"
+    save_file_name=f"{file_name}_{current_time}"
+    csv_file_name = f"{file_name}_{current_time}.csv"
 
 
     SendInfoBack=ResultInfoModel()
-    SendInfoBack.FileName=full_file_name
+    SendInfoBack.FileName=csv_file_name
     # # Save the DataFrame to a CSV file
-    df.to_csv(full_file_name, index=False)
-    # print(f"Data collection completed and saved to {full_file_name}")
+    df.to_csv(save_file_name, index=False)
+    # print(f"Data collection completed and saved to {csv_file_name}")
+    inference(inference_df,SendInfoBack,save_file_name)
 
     # Extract the required range from the DataFrame
     # # df_extracted = df[skip:limit - skip]
-    # extracted_file_name = f"extracted_{full_file_name}"
+    # extracted_file_name = f"extracted_{csv_file_name}"
     # df.to_csv(extracted_file_name, index=False)
-
     # Upload extracted file to Google Drive
-    upload_to_drive(folder_name, full_file_name,SendInfoBack)
+    upload_to_drive(folder_name, csv_file_name,SendInfoBack)
     result_queue.put(SendInfoBack)
     return
 

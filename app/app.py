@@ -10,6 +10,7 @@ import ipaddress
 import os
 import signal
 import subprocess
+from .inference import NP_ARRAYS_PATH, retrain_model
 
 result_queue=multiprocessing.Queue()
 
@@ -17,6 +18,11 @@ result_queue=multiprocessing.Queue()
 async def lifespan(app:FastAPI):
     
     yield
+    total_data_collected=len(os.listdir(NP_ARRAYS_PATH))
+
+    if total_data_collected>= 100:
+        retrain_model()
+    
     # subprocess.run(["shutdown", "-h"])
     return
 

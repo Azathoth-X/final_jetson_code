@@ -132,8 +132,8 @@
 
 # # Compute the centroids for each cluster
 # centroids = []
-# for label in np.unique(agglo_labels):
-#     centroid = combined_feature_data[agglo_labels == label].mean(axis=0)
+# for lable in np.unique(agglo_labels):
+#     centroid = combined_feature_data[agglo_labels == lable].mean(axis=0)
 #     centroids.append(centroid)
 
 # centroids = np.array(centroids)
@@ -164,6 +164,8 @@ import numpy as np
 import joblib
 from xgboost import XGBClassifier
 from .schema import ResultInfoModel
+import os
+import json
 
 # # Step 2: Retrain with New Data
 # # Assuming X_train_new and y_train_new are the new training data
@@ -177,7 +179,7 @@ from .schema import ResultInfoModel
 # # Predict class for new input data
 # new_data = X_test[0].reshape(1, -1)  # Replace X_test[0] with your actual input data
 # predicted_label = updated_model.predict(new_data)
-# # Map numerical label to class label
+# # Map numerical lable to class lable
 # class_mapping = {0: 'TB-Negative', 1: 'TB-Positive'}
 # predicted_class = class_mapping[predicted_label[0]]
 # # Output the predicted class
@@ -187,6 +189,10 @@ from .schema import ResultInfoModel
 
 
 MODEL_PATH:str = 'ml_model/xgboost_model.pkl'
+NP_ARRAYS_PATH: str = 'data/numpy_arrays/'
+INFERENCE_RESULTS_PATH: str = 'data/inference_results.json'
+
+os.makedirs(NP_ARRAYS_PATH, exist_ok=True)
 
 def load_model():
     try:
@@ -196,6 +202,30 @@ def load_model():
         print("No existing model found. Please train the model first.")
         return None
     return loaded_model
+
+def save_numpy_array(array: np.ndarray, save_name_npy:str):
+    npy_file = os.path.join(NP_ARRAYS_PATH, f"{save_name_npy}")
+    np.save(npy_file, array)
+    # print(f"Numpy array saved to {npy_file}")
+
+
+
+def save_inference_result(save_name_npy:str, result: bool):
+    if os.path.exists(INFERENCE_RESULTS_PATH):
+        with open(INFERENCE_RESULTS_PATH, 'r') as f:
+            results_data = json.load(f)
+    else:
+        results_data = {}
+
+    
+    results_data[f"{save_name_npy}"] = result
+
+    with open(INFERENCE_RESULTS_PATH, 'w') as f:
+        json.dump(results_data, f, indent=4)
+    # print(f"Inference result saved to {INFERENCE_RESULTS_PATH}")
+
+
+
 
 def convertToDiff(sample: pd.DataFrame) -> np.ndarray:
     if sample.shape[0] < 600:
@@ -209,20 +239,55 @@ def convertToDiff(sample: pd.DataFrame) -> np.ndarray:
 
     return diff_df
 
-def inference(df: pd.DataFrame,sendInfo:ResultInfoModel):
+def inference_get_result(df: pd.DataFrame,sendInfo:ResultInfoModel,save_name:str):
+
+    file_name_npy=f"{save_name}.npy"
+
     inference_data = convertToDiff(df)
     
     xgmodel = load_model()
-    if xgmodel is None:
-        return "Model not available. Please train the model."
+    
     
     predicted_label = xgmodel.predict(inference_data)
-    
-    class_mapping = {0: 'TB-Negative', 1: 'TB-Positive'}
-    if predicted_label[0]==1:
-        sendInfo.TB_InferenceResult=True
-    else:
-        sendInfo.TB_InferenceResult=False   
-    # predicted_class = class_mapping.get(predicted_label[0], 'Unknown')
+
+    save_numpy_array(inference_data,file_name_npy)
+
+
+
+    TB_prediction:bool= predicted_label[0] == 1
+
+    save_inference_result(file_name_npy,TB_prediction)
+
+    sendInfo.TB_InferenceResult=TB_prediction
+
+
     return
     # return predicted_class
+
+
+
+def retrain_model():
+    get_arrays=[]
+    get_lables=[]
+
+
+    with open(INFERENCE_RESULTS_PATH,'r')as f:
+        result_data_json=json.load(f)
+   
+    for npy_file in os.listdir(NP_ARRAYS_PATH):
+        path_npy=os.path.join(NP_ARRAYS_PATH,npy_file)
+        data_array=np.load(path_npy)
+        get_arrays.append(data_array)
+
+        
+        lable=result_data_json.get(path_npy,)
+
+        get_lables.append(1 if lable else 0)
+    
+    x_train=np.vstack(get_arrays)
+    y_train=np.array(get_lables)
+
+    xgb=XGBClassifier()
+    xgb.fit(x_train,y_train)
+
+    joblib.dump(xgb,MODEL_PATH)
