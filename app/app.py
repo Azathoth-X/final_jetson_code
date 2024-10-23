@@ -5,7 +5,6 @@ import logging
 from fastapi.websockets import WebSocketState
 from .readings import collect_data
 from contextlib import asynccontextmanager
-import joblib
 from .schema import ResultInfoModel
 import ipaddress
 import os
@@ -18,7 +17,7 @@ result_queue=multiprocessing.Queue()
 async def lifespan(app:FastAPI):
     
     yield
-    subprocess.run(["shutdown", "-h"])
+    # subprocess.run(["shutdown", "-h"])
     return
 
 
