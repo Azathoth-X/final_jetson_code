@@ -115,7 +115,7 @@ def collect_data(folder_name: str, file_name:str,result_queue):
     df = pd.DataFrame(final_data, columns=['GO1', 'GO2', 'PANI_F1', 'Mg'])
 
     # Format the file name with current date and time
-    current_time = datetime.now().strftime("%Y-%m-%d_%H:%M%:S")
+    current_time = datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
     full_file_name = f"{file_name}_{current_time}.csv"
 
 
