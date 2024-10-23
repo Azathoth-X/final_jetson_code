@@ -209,7 +209,7 @@ def convertToDiff(sample: pd.DataFrame) -> np.ndarray:
 
     return diff_df
 
-def inference(df: pd.DataFrame,sendInfo:ResultInfoModel) -> str:
+def inference(df: pd.DataFrame,sendInfo:ResultInfoModel):
     inference_data = convertToDiff(df)
     
     xgmodel = load_model()
@@ -219,6 +219,10 @@ def inference(df: pd.DataFrame,sendInfo:ResultInfoModel) -> str:
     predicted_label = xgmodel.predict(inference_data)
     
     class_mapping = {0: 'TB-Negative', 1: 'TB-Positive'}
-    predicted_class = class_mapping.get(predicted_label[0], 'Unknown')
-    
-    return predicted_class
+    if predicted_label[0]==1:
+        sendInfo.TB_InferenceResult=True
+    else:
+        sendInfo.TB_InferenceResult=False   
+    # predicted_class = class_mapping.get(predicted_label[0], 'Unknown')
+    return
+    # return predicted_class
