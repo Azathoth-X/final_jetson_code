@@ -110,7 +110,10 @@ def shutdown_jetson(request:Request):
         return Response("Shutting Down",status.HTTP_200_OK)
 
 
-
+@app.get('/test')
+def get_test():
+    from .test import retrain_model_test
+    retrain_model_test()
 
 if __name__ == "__main__":
     import uvicorn
