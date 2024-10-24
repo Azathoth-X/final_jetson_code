@@ -188,7 +188,7 @@ import json
 
 
 
-MODEL_PATH:str = 'ml_model/xgboost_model.pkl'
+MODEL_PATH:str = 'app/ml_model/xgboost_model.pkl'
 NP_ARRAYS_PATH: str = 'data/numpy_arrays/'
 INFERENCE_RESULTS_PATH: str = 'data/inference_results.json'
 
@@ -196,7 +196,7 @@ os.makedirs(NP_ARRAYS_PATH, exist_ok=True)
 
 def load_model():
     try:
-        loaded_model = joblib.load(MODEL_PATH)
+        loaded_model:XGBClassifier = joblib.load(MODEL_PATH)
         print("Existing model loaded.")
     except FileNotFoundError:
         print("No existing model found. Please train the model first.")
@@ -245,9 +245,8 @@ def inference_get_result(df: pd.DataFrame,sendInfo:ResultInfoModel,save_name:str
 
     inference_data = convertToDiff(df)
     
-    xgmodel = load_model()
-    
-    
+    xgmodel:XGBClassifier = load_model()
+    assert xgmodel is not None
     predicted_label = xgmodel.predict(inference_data)
 
     save_numpy_array(inference_data,file_name_npy)
