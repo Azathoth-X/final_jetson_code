@@ -236,7 +236,11 @@ def convertToDiff(sample: pd.DataFrame) -> np.ndarray:
 
     diff_df = baseline.values - breath.values
     # diff_df = diff_df.reshape(1, -1)
-    diff_df=np.vstack([diff_df.flatten()])
+    # diff_df=np.vstack([diff_df.flatten()])
+
+    if diff_df.shape[1] == 300:
+        return diff_df.reshape(1, -1) 
+
 
     return diff_df
 
