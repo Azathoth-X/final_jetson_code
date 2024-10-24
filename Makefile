@@ -1,10 +1,9 @@
-# Makefile to clean Python cache files and remove the data folder
 
-# Specify the folders to clean
+
 APP_FOLDER = app
 DATA_FOLDER = data
 
-# Define the clean command
+
 .PHONY: clean
 clean:
 	@echo "Removing Python cache files from $(APP_FOLDER)..."
@@ -13,7 +12,7 @@ clean:
 	find $(APP_FOLDER) -name "*.pyo" -type f -delete || true
 	@echo "Cache files removed."
 
-# Define the remove_data command
+
 .PHONY: remove_data
 remove_data:
 	@echo "Removing data folder..."

@@ -218,7 +218,7 @@ def save_inference_result(save_name_npy:str, result: int):
         results_data = {}
 
     
-    results_data[f"{save_name_npy}"] = result
+    results_data[f"{save_name_npy}"] = int(result)
 
     with open(INFERENCE_RESULTS_PATH, 'w') as f:
         json.dump(results_data, f, indent=4)
@@ -285,9 +285,9 @@ def retrain_model():
         get_arrays.append(data_array)
 
         
-        lable=result_data_json.get(path_npy)
+        lable=int(result_data_json.get(npy_file,0))
 
-        get_lables.append(1 if lable else 0)
+        get_lables.append(lable)
     
     x_train=np.vstack(get_arrays)
     y_train=np.array(get_lables)
