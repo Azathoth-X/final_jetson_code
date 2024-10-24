@@ -10,7 +10,7 @@ from queue import Queue
 from datetime import datetime
 from app.files_handler import upload_to_drive
 from .schema import ResultInfoModel
-from .inference import inference
+from .inference import inference_get_result
 
 # Define the serial ports for each Arduino
 # top-left port gets 0 auto similarly tor right is 1, bottom left is 2 and bottom right is 3
