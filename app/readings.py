@@ -125,7 +125,7 @@ def collect_data(folder_name: str, file_name:str,result_queue):
     # # Save the DataFrame to a CSV file
     df.to_csv(save_file_name, index=False)
     # print(f"Data collection completed and saved to {csv_file_name}")
-    inference(inference_df,SendInfoBack,save_file_name)
+    inference_get_result(inference_df,SendInfoBack,save_file_name)
 
     # Extract the required range from the DataFrame
     # # df_extracted = df[skip:limit - skip]
