@@ -81,7 +81,7 @@ def collect_data(folder_name: str, file_name:str,result_queue):
 
     # Collect data from the queue
     data = [[] for _ in range(len(ARDUINO_PORTS))]
-    limit = 1000
+    limit = 600
 
     try:
         while all(len(d) < limit for d in data):  # Collect 400 values for each port

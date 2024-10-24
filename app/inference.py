@@ -240,6 +240,7 @@ def convertToDiff(sample: pd.DataFrame) -> np.ndarray:
 
     # if diff_df.shape[1] == 300:
     #     return diff_df.reshape(1, -1) 
+    diff_df=diff_df.T
 
 
     return diff_df
