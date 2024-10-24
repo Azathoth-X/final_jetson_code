@@ -206,7 +206,7 @@ def load_model():
 def save_numpy_array(array: np.ndarray, save_name_npy:str):
     npy_file = os.path.join(NP_ARRAYS_PATH, f"{save_name_npy}")
     np.save(npy_file, array)
-    # print(f"Numpy array saved to {npy_file}")
+    print(f"Numpy array saved to {npy_file}")
 
 
 
@@ -222,7 +222,7 @@ def save_inference_result(save_name_npy:str, result: bool):
 
     with open(INFERENCE_RESULTS_PATH, 'w') as f:
         json.dump(results_data, f, indent=4)
-    # print(f"Inference result saved to {INFERENCE_RESULTS_PATH}")
+    print(f"Inference result saved to {INFERENCE_RESULTS_PATH}")
 
 
 
@@ -235,7 +235,8 @@ def convertToDiff(sample: pd.DataFrame) -> np.ndarray:
     breath = sample[300:600]
 
     diff_df = baseline.values - breath.values
-    diff_df = diff_df.reshape(1, -1)
+    # diff_df = diff_df.reshape(1, -1)
+    diff_df=np.vstack([diff_df.flatten()])
 
     return diff_df
 
