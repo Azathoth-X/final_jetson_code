@@ -123,7 +123,7 @@ def collect_data(folder_name: str, file_name:str,result_queue):
     SendInfoBack=ResultInfoModel()
     SendInfoBack.FileName=csv_file_name
     # # Save the DataFrame to a CSV file
-    df.to_csv(save_file_name, index=False)
+    df.to_csv(csv_file_name, index=False)
     # print(f"Data collection completed and saved to {csv_file_name}")
     inference_get_result(inference_df,SendInfoBack,save_file_name)
 
