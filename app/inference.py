@@ -210,7 +210,7 @@ def save_numpy_array(array: np.ndarray, save_name_npy:str):
 
 
 
-def save_inference_result(save_name_npy:str, result: bool):
+def save_inference_result(save_name_npy:str, result: int):
     if os.path.exists(INFERENCE_RESULTS_PATH):
         with open(INFERENCE_RESULTS_PATH, 'r') as f:
             results_data = json.load(f)
@@ -259,11 +259,11 @@ def inference_get_result(df: pd.DataFrame,sendInfo:ResultInfoModel,save_name:str
 
 
 
-    TB_prediction:bool= predicted_label[0] == 1
+    TB_prediction:int= predicted_label[0]
 
     save_inference_result(file_name_npy,TB_prediction)
 
-    sendInfo.TB_InferenceResult=TB_prediction
+    sendInfo.TB_InferenceResult=TB_prediction==1
 
 
     return
@@ -285,7 +285,7 @@ def retrain_model():
         get_arrays.append(data_array)
 
         
-        lable=result_data_json.get(path_npy,)
+        lable=result_data_json.get(path_npy)
 
         get_lables.append(1 if lable else 0)
     
