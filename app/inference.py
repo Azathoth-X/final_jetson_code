@@ -58,11 +58,7 @@ def convertToDiff(sample: pd.DataFrame) -> np.ndarray:
     breath = sample[300:600]
 
     diff_df = baseline.values - breath.values
-    # diff_df = diff_df.reshape(1, -1)
-    # diff_df=np.vstack([diff_df.flatten()])
 
-    # if diff_df.shape[1] == 300:
-    #     return diff_df.reshape(1, -1) 
     diff_df=diff_df.T
 
 
@@ -90,7 +86,6 @@ def inference_get_result(df: pd.DataFrame,sendInfo:ResultInfoModel,save_name:str
 
 
     return
-    # return predicted_class
 
 
 
