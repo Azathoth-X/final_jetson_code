@@ -74,15 +74,18 @@ def inference_get_result(df: pd.DataFrame,sendInfo:ResultInfoModel,save_name:str
     assert xgmodel is not None
     predicted_label = xgmodel.predict(inference_data)
 
+    
+
     save_numpy_array(inference_data,file_name_npy)
 
 
+    
+    TB_prediction_bool:bool= bool(predicted_label[0] and (predicted_label[1] or not predicted_label[1]) and (predicted_label[2] or not predicted_label[2]) and (predicted_label[3] or not predicted_label[3]))
+    TB_prediction_int:int= 1 if TB_prediction_bool else 0
 
-    TB_prediction:int= predicted_label[0]
+    save_inference_result(file_name_npy,TB_prediction_int)
 
-    save_inference_result(file_name_npy,TB_prediction)
-
-    sendInfo.TB_InferenceResult=TB_prediction==1
+    sendInfo.TB_InferenceResult=TB_prediction_bool
 
 
     return
