@@ -23,7 +23,7 @@ async def lifespan(app:FastAPI):
     if total_data_collected>= 100:
         retrain_model()
     
-    # subprocess.run(["shutdown", "-h"])
+    subprocess.run(["shutdown", "-h"])
     return
 
 
