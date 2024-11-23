@@ -2,7 +2,7 @@
 
 #!/usr/bin/env python3
 
-import serial
+from serial import Serial, SerialException
 import time
 import pandas as pd
 import threading
@@ -25,9 +25,9 @@ stop_event = threading.Event()
 # Open serial connections
 for port in ARDUINO_PORTS:
     try:
-        ser = serial.Serial(port, BAUD_RATE)
+        ser = Serial(port, BAUD_RATE)
         ser_list.append(ser)
-    except serial.SerialException as e:
+    except SerialException as e:
         print(f"Could not open port {port}: {e}")
 
 def read_from_port(ser, index):
@@ -36,7 +36,7 @@ def read_from_port(ser, index):
             if ser.in_waiting > 0:
                 line = ser.readline().decode('utf-8').strip()
                 data_queue.put((index, float(line)))  # Add index to identify the port
-        except serial.SerialException as e:
+        except SerialException as e:
             print(f"Serial exception on port {index}: {e}")
             break
         except Exception as e:
