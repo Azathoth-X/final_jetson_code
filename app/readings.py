@@ -10,7 +10,7 @@ from queue import Queue
 from datetime import datetime
 from app.files_handler import upload_to_drive
 from .schema import ResultInfoModel
-from .inference import inference_get_result
+from .inference import inference_get_result,save_training_data
 
 # Define the serial ports for each Arduino
 # top-left port gets 0 auto similarly tor right is 1, bottom left is 2 and bottom right is 3
@@ -138,3 +138,76 @@ def collect_data(folder_name: str, file_name:str,result_queue):
 
 
 
+
+def save_collection_data(folder_name: str, file_name:str,result_queue,prev_res:bool):
+    '''
+        The function is used for collecting training data and has to be provided previous TB results of the patient.
+    '''
+    threads = []
+    for index, ser in enumerate(ser_list):
+        if ser.is_open:
+            thread = threading.Thread(target=read_from_port, args=(ser, index))
+            thread.daemon = True
+            thread.start()
+            threads.append(thread)
+
+    # Collect data from the queue
+    data = [[] for _ in range(len(ARDUINO_PORTS))]
+    limit = 600
+
+    try:
+        while all(len(d) < limit for d in data):  # Collect 400 values for each port
+            while not data_queue.empty():
+                index, value = data_queue.get()
+                if len(data[index]) < limit:
+                    data[index].append(value)
+                    print(f'Port {index}: Value {value}')
+            time.sleep(0.01)  # Adjust the sleep time as needed
+
+    except Exception as e:
+        print(f"Error in data collection: {e}")
+    finally:
+        stop_event.set()  # Signal threads to stop
+        for ser in ser_list:
+            if ser.is_open:
+                ser.close()
+
+    for thread in threads:
+        thread.join()
+
+    # Ensure all 400 values are collected
+    for i, d in enumerate(data):
+        while len(d) < limit:
+            d.append(None)  # Fill with None if fewer than 400 values collected
+
+    # Transpose data to match the original format
+    final_data = list(map(list, zip(*data)))
+    inference_df=pd.DataFrame(final_data)
+    # Create a DataFrame and save it to a CSV file
+    df = pd.DataFrame(final_data, columns=['GO', 'Ni', 'MOF', 'Mg'])
+
+    # Format the file name with current date and time
+    current_time = datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
+    save_file_name=f"{file_name}_{current_time}"
+    csv_file_name = f"{file_name}_{current_time}.csv"
+
+
+    SendInfoBack=ResultInfoModel()
+    
+    SendInfoBack.FileName=csv_file_name
+
+    SendInfoBack.TB_InferenceResult=prev_res
+    # # Save the DataFrame to a CSV file
+    df.to_csv(csv_file_name, index=False)
+
+    # print(f"Data collection completed and saved to {csv_file_name}")
+    save_training_data(inference_df,SendInfoBack,save_file_name)
+
+    # Extract the required range from the DataFrame
+    # # df_extracted = df[skip:limit - skip]
+    # extracted_file_name = f"extracted_{csv_file_name}"
+    # df.to_csv(extracted_file_name, index=False)
+    # Upload extracted file to Google Drive
+    upload_to_drive(folder_name, csv_file_name,SendInfoBack)
+    result_queue.put(SendInfoBack)
+    return

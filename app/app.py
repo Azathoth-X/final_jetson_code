@@ -3,7 +3,7 @@ from fastapi import FastAPI,WebSocket,WebSocketDisconnect,Request,Response,statu
 import multiprocessing
 import logging
 from fastapi.websockets import WebSocketState
-from .readings import collect_data
+from .readings import collect_data,save_collection_data
 from contextlib import asynccontextmanager
 from .schema import ResultInfoModel
 import ipaddress
@@ -70,13 +70,34 @@ async def websocket_endpoint(websocket: WebSocket):
             data = await websocket.receive_text()
             message = json.loads(data)
 
-            if message['type'] == 'START_ANALYSIS' :
+            if message['type'] == 'START_ANALYSIS' and 'PREV_RESULT' not in message:
 
                 patient_name:str = message['name']
 
                 await websocket.send_text(json.dumps({'type': 'ANALYSIS_RESULT', 'result': 'starting'}))
 
                 reading_and_result=multiprocessing.Process(target=collect_data,args=("test", patient_name,result_queue), daemon=False)
+
+                reading_and_result.start()
+
+                reading_and_result.join()
+
+                reading_and_result.close()
+
+                return_result:ResultInfoModel= result_queue.get()
+
+                await websocket.send_text(return_result.model_dump_json())
+
+                break
+
+            if 'PREV_RESULT' in message and message['type'] == 'START_ANALYSIS':
+
+                patient_name:str=message['name']
+                patient_results:bool=message['PREV_RESULT']
+
+                await websocket.send_text(json.dumps({'type': 'ANALYSIS_RESULT', 'result': 'starting'}))
+
+                reading_and_result=multiprocessing.Process(target=collect_data,args=("training", patient_name,result_queue), daemon=False)
 
                 reading_and_result.start()
 

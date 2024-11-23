@@ -11,7 +11,7 @@ import json
 
 
 
-MODEL_PATH:str = 'app/ml_model/xgboost_model.pkl'
+MODEL_PATH:str = 'app/ml_model/transpose_flatten_xgboost_model.pkl'
 NP_ARRAYS_PATH: str = 'data/numpy_arrays/'
 INFERENCE_RESULTS_PATH: str = 'data/inference_results.json'
 
@@ -60,9 +60,31 @@ def convertToDiff(sample: pd.DataFrame) -> np.ndarray:
     diff_df = baseline.values - breath.values
 
     diff_df=diff_df.T
+    diff_df=diff_df.flatten()
 
 
     return diff_df
+
+
+
+
+
+
+def save_training_data(df: pd.DataFrame,sendInfo:ResultInfoModel,save_name:str):
+
+    file_name_npy=f"{save_name}.npy"
+
+    inference_data = convertToDiff(df)
+
+    save_numpy_array(inference_data,file_name_npy)
+
+    save_inference_result(file_name_npy,int(sendInfo.TB_InferenceResult))
+
+
+
+    return
+
+
 
 def inference_get_result(df: pd.DataFrame,sendInfo:ResultInfoModel,save_name:str):
 
@@ -70,9 +92,10 @@ def inference_get_result(df: pd.DataFrame,sendInfo:ResultInfoModel,save_name:str
 
     inference_data = convertToDiff(df)
     
+
     xgmodel:XGBClassifier = load_model()
     assert xgmodel is not None
-    predicted_label = xgmodel.predict(inference_data)
+    predicted_label = xgmodel.predict(inference_data.reshape(1,-1))
 
     
 
@@ -80,7 +103,7 @@ def inference_get_result(df: pd.DataFrame,sendInfo:ResultInfoModel,save_name:str
 
 
     
-    TB_prediction_bool:bool= bool(predicted_label[0] and (predicted_label[1] or not predicted_label[1]) and (predicted_label[2] or not predicted_label[2]) and (predicted_label[3] or not predicted_label[3]))
+    TB_prediction_bool:bool= bool(predicted_label[0] )
     TB_prediction_int:int= 1 if TB_prediction_bool else 0
 
     save_inference_result(file_name_npy,TB_prediction_int)
@@ -117,3 +140,7 @@ def retrain_model():
     xgb.fit(x_train,y_train)
 
     joblib.dump(xgb,MODEL_PATH)
+
+    os.remove(INFERENCE_RESULTS_PATH)
+    os.remove(NP_ARRAYS_PATH)
+    return
