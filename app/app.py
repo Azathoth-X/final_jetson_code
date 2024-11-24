@@ -112,8 +112,8 @@ async def websocket_endpoint(websocket: WebSocket):
                 break
 
     except WebSocketDisconnect:
-        reading_and_result.close()
-        print("Thread closed")
+        reading_and_result.kill()
+        print("WB disconnect Process killed")
         print("WebSocket connection closed")
         
     finally:
