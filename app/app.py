@@ -42,6 +42,7 @@ END_IP = ipaddress.ip_address("192.168.1.200")
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     global connected_client, shutdownAvailable
+    reading_and_result = None  # Initialize process variable
 
     client_host=websocket.client.host
 
@@ -76,7 +77,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
                 await websocket.send_text(json.dumps({'type': 'ANALYSIS_RESULT', 'result': 'starting'}))
 
-                reading_and_result=multiprocessing.Process(target=collect_data,args=("test", patient_name,result_queue), daemon=True)
+                reading_and_result = multiprocessing.Process(target=collect_data,args=("test", patient_name,result_queue), daemon=True)
 
                 reading_and_result.start()
 
@@ -97,7 +98,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
                 await websocket.send_text(json.dumps({'type': 'ANALYSIS_RESULT', 'result': 'starting'}))
 
-                reading_and_result=multiprocessing.Process(target=save_collection_data,args=("test", patient_name,result_queue,patient_results), daemon=True)
+                reading_and_result = multiprocessing.Process(target=save_collection_data,args=("test", patient_name,result_queue,patient_results), daemon=True)
 
                 reading_and_result.start()
 
@@ -112,11 +113,13 @@ async def websocket_endpoint(websocket: WebSocket):
                 break
 
     except WebSocketDisconnect:
-        reading_and_result.kill()
-        print("WB disconnect Process killed")
+        if reading_and_result and reading_and_result.is_alive():
+            reading_and_result.kill()
+            reading_and_result = None
         print("WebSocket connection closed")
         
     finally:
+        reading_and_result = None
         shutdownAvailable=True
         connected_client = None
         if not websocket.application_state == WebSocketState.DISCONNECTED:
