@@ -76,7 +76,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
                 await websocket.send_text(json.dumps({'type': 'ANALYSIS_RESULT', 'result': 'starting'}))
 
-                reading_and_result=multiprocessing.Process(target=collect_data,args=("test", patient_name,result_queue), daemon=False)
+                reading_and_result=multiprocessing.Process(target=collect_data,args=("test", patient_name,result_queue), daemon=True)
 
                 reading_and_result.start()
 
@@ -97,7 +97,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
                 await websocket.send_text(json.dumps({'type': 'ANALYSIS_RESULT', 'result': 'starting'}))
 
-                reading_and_result=multiprocessing.Process(target=save_collection_data,args=("test", patient_name,result_queue,patient_results), daemon=False)
+                reading_and_result=multiprocessing.Process(target=save_collection_data,args=("test", patient_name,result_queue,patient_results), daemon=True)
 
                 reading_and_result.start()
 
