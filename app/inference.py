@@ -3,7 +3,7 @@
 
 import pandas as pd
 import numpy as np
-import joblib
+# import joblib
 from xgboost import XGBClassifier
 from .schema import ResultInfoModel
 import os
@@ -11,15 +11,17 @@ import json
 
 
 
-MODEL_PATH:str = 'app/ml_model/transpose_flatten_xgboost_model.pkl'
+MODEL_PATH:str = 'app/ml_model/transpose_flatten_xgboost_model.model'
 NP_ARRAYS_PATH: str = 'data/numpy_arrays/'
 INFERENCE_RESULTS_PATH: str = 'data/inference_results.json'
 
 os.makedirs(NP_ARRAYS_PATH, exist_ok=True)
 
-def load_model():
+def get_load_model():
+
+    loaded_model=XGBClassifier()
     try:
-        loaded_model:XGBClassifier = joblib.load(MODEL_PATH)
+        loaded_model.load_model(MODEL_PATH)
         print("Existing model loaded.")
     except FileNotFoundError:
         print("No existing model found. Please train the model first.")
@@ -93,7 +95,7 @@ def inference_get_result(df: pd.DataFrame,sendInfo:ResultInfoModel,save_name:str
     inference_data = convertToDiff(df)
     
 
-    xgmodel:XGBClassifier = load_model()
+    xgmodel:XGBClassifier = get_load_model()
     assert xgmodel is not None
     predicted_label = xgmodel.predict(inference_data.reshape(1,-1))
 
@@ -103,8 +105,8 @@ def inference_get_result(df: pd.DataFrame,sendInfo:ResultInfoModel,save_name:str
 
 
     
-    TB_prediction_bool:bool= bool(predicted_label[0] )
-    TB_prediction_int:int= 1 if TB_prediction_bool else 0
+    TB_prediction_bool:bool = True if predicted_label[0] == 1 else False
+    TB_prediction_int:int= predicted_label[0]
 
     save_inference_result(file_name_npy,TB_prediction_int)
 
@@ -139,7 +141,8 @@ def retrain_model():
     xgb=XGBClassifier()
     xgb.fit(x_train,y_train)
 
-    joblib.dump(xgb,MODEL_PATH)
+    # joblib.dump(xgb,MODEL_PATH)
+    xgb.save_model(MODEL_PATH)
 
     os.remove(INFERENCE_RESULTS_PATH)
     os.remove(NP_ARRAYS_PATH)

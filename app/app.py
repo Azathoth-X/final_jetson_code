@@ -1,7 +1,7 @@
 import json
 from fastapi import FastAPI,WebSocket,WebSocketDisconnect,Request,Response,status
 import multiprocessing
-import logging
+# import logging
 from fastapi.websockets import WebSocketState
 from .readings import collect_data,save_collection_data
 from contextlib import asynccontextmanager
@@ -89,6 +89,8 @@ async def websocket_endpoint(websocket: WebSocket):
 
                 await websocket.send_text(return_result.model_dump_json())
 
+                websocket.close()   
+
                 break
 
             if message is not None and 'PREV_RESULT' in message and message['type'] == 'START_ANALYSIS':
@@ -110,11 +112,14 @@ async def websocket_endpoint(websocket: WebSocket):
 
                 await websocket.send_text(return_result.model_dump_json())
 
+                websocket.close()
+
                 break
 
     except WebSocketDisconnect:
         if reading_and_result and reading_and_result.is_alive():
             reading_and_result.kill()
+            print("process killed")
             reading_and_result = None
         print("WebSocket connection closed")
         
@@ -134,12 +139,6 @@ def shutdown_jetson(request:Request):
     if shutdownAvailable:
         os.kill(os.getpid(),signal.SIGINT)
         return Response("Shutting Down",status.HTTP_200_OK)
-
-
-@app.get('/test')
-def get_test():
-    from .test import retrain_model_test
-    retrain_model_test()
 
 if __name__ == "__main__":
     import uvicorn
