@@ -71,13 +71,13 @@ async def websocket_endpoint(websocket: WebSocket):
             data = await websocket.receive_text()
             message = json.loads(data)
 
-            if message['type'] == 'START_ANALYSIS' and 'PREV_RESULT' not in message:
+            if message is not None and message['type'] == 'START_ANALYSIS' and 'PREV_RESULT' not in message:
 
                 patient_name:str = message['name']
 
                 await websocket.send_text(json.dumps({'type': 'ANALYSIS_RESULT', 'result': 'starting'}))
 
-                reading_and_result = multiprocessing.Process(target=collect_data,args=("test", patient_name,result_queue), daemon=True)
+                reading_and_result = multiprocessing.Process(target=collect_data,args=("test", patient_name,result_queue), daemon=False)
 
                 reading_and_result.start()
 
@@ -91,14 +91,14 @@ async def websocket_endpoint(websocket: WebSocket):
 
                 break
 
-            if 'PREV_RESULT' in message and message['type'] == 'START_ANALYSIS':
+            if message is not None and 'PREV_RESULT' in message and message['type'] == 'START_ANALYSIS':
 
                 patient_name:str=message['name']
                 patient_results:bool=message['PREV_RESULT']
 
                 await websocket.send_text(json.dumps({'type': 'ANALYSIS_RESULT', 'result': 'starting'}))
 
-                reading_and_result = multiprocessing.Process(target=save_collection_data,args=("test", patient_name,result_queue,patient_results), daemon=True)
+                reading_and_result = multiprocessing.Process(target=save_collection_data,args=("test", patient_name,result_queue,patient_results), daemon=False)
 
                 reading_and_result.start()
 
