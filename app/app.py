@@ -112,7 +112,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
                 await websocket.send_text(return_result.model_dump_json())
 
-                websocket.close()
+                await websocket.close()
 
                 break
 
