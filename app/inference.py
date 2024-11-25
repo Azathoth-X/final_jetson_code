@@ -103,6 +103,7 @@ def inference_get_result(df: pd.DataFrame,sendInfo:ResultInfoModel,save_name:str
 
     save_numpy_array(inference_data,file_name_npy)
 
+    print (predicted_label)
 
     
     TB_prediction_bool:bool = True if predicted_label[0] == 1 else False
