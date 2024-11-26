@@ -81,7 +81,7 @@ def collect_data(folder_name: str, file_name:str,result_queue):
 
     # Collect data from the queue
     data = [[] for _ in range(len(ARDUINO_PORTS))]
-    limit = 600
+    limit = 700
 
     try:
         while all(len(d) < limit for d in data):  # Collect 400 values for each port
@@ -153,7 +153,7 @@ def save_collection_data(folder_name: str, file_name:str,result_queue,prev_res:b
 
     # Collect data from the queue
     data = [[] for _ in range(len(ARDUINO_PORTS))]
-    limit = 600
+    limit = 700
 
     try:
         while all(len(d) < limit for d in data):  # Collect 400 values for each port
